@@ -1,0 +1,7 @@
+#! /bin/sh
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../lib/
+export AFEPACK_PATH="../../"
+export AFEPACK_TEMPLATE_PATH="$AFEPACK_PATH/template/triangle:$AFEPACK_PATH/template/interval:$AFEPACK_PATH/template/rectangle:$AFEPACK_PATH/template/tetrahedron"
+exec ./main $*
+

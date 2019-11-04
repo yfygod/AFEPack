@@ -1,0 +1,27 @@
+include ../../../Makefile.1
+
+geometry = $(notdir $(PWD))
+csourse = $(wildcard *.c)
+cppsourse = $(wildcard *.cpp)
+object = $(patsubst %.c, %.o, $(csourse)) $(patsubst %.cpp, %.o, $(cppsourse))
+sourse = $(csourse) $(cppsourse)
+cxxflags = -std=c++11 -I ../../../include/ -fPIC -O3
+ccflags = -fPIC -O3 
+library = $(geometry).bas_fun.so
+
+all: $(library)
+
+%.o : %.cpp 
+	$(CXX) -c -o $@ $< $(cxxflags) 
+
+
+%.o : %.c
+	$(CC) -c -o $@ $< $(ccflags)
+
+$(library) : $(object)
+	$(CXX) -shared -o $@ $(object)
+
+clean:
+	-rm -rf $(object) $(library)
+
+.PHONY: default clean all
