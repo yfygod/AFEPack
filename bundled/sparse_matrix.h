@@ -6,6 +6,9 @@
  * @date 2019-11-03
  */
 
+#ifndef __SPARSE_MATRIX_H_
+#define __SPARSE_MATRIX_H_
+
 #include <cstring>
 
 #include "sparsity_pattern.h"
@@ -195,3 +198,5 @@ ostream& operator << (ostream& os, const SparseMatrix<Scalar, Index>& matrix) {
 }
 
 #include "sparse_matrix.templates.h"
+
+#endif
