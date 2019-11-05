@@ -1,4 +1,53 @@
 template <typename Index>
+SparsityPatternBase<Index>::SparsityPatternBase(
+    const SparsityPatternBase<Index>& original, 
+    const Index max_per_row, 
+    const Index extra_off_diagonals) : 
+  max_dim(0),
+  max_vec_len(0),
+  rowstart(NULL),
+  colnums(NULL) {
+
+  Assert(original.rows == original.cols, "the sparsity pattern is not quadratic");
+  Assert(original.is_compressed(), "compress first");
+
+  reinit(original.rows, original.cols, max_per_row);
+
+  for(index_t row = 0; row < original.rows; ++row) {
+    const index_t * const original_row_start = 
+      &original.colnums[original.rowstart[row]] + 1;
+
+    const index_t * const original_row_end = 
+      &original.colnums[original.rowstart[row + 1]];
+
+    const index_t * const original_last_before_side_diagonals = 
+      (row > extra_off_diagonals ? Utilities::lower_bound(
+          original_row_start, original_row_end, row - extra_off_diagonals) : 
+      original_row_start);
+
+    const index_t * const original_first_after_side_diagonals = 
+      (row < rows - extra_off_diagonals - 1 ? 
+       std::upper_bound(original_row_start, original_row_end, 
+         row + extra_off_diagonals) : original_row_end);
+
+    index_t * next_free_slot = &colnums[rowstart[row]] + 1;
+
+    next_free_slot = std::copy(original_row_start, 
+        original_last_before_side_diagonals, next_free_slot);
+
+    for(index_t i = 1; i <= std::min(row, extra_off_diagonals); ++i, ++next_free_slot)
+      *next_free_slot = row - i;
+
+    for(index_t i = 1; i <= std::min(extra_off_diagonals, rows - row - 1); ++i, ++next_free_slot)
+      *next_free_slot = row + i;
+
+    next_free_slot = std::copy(original_first_after_side_diagonals,
+        original_row_end, next_free_slot);
+  }
+}
+
+
+template <typename Index>
 void SparsityPatternBase<Index>::reinit(const index_t m, 
     const index_t n, 
     const index_t max_per_row) {

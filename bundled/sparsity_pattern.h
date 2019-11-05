@@ -10,6 +10,7 @@
 #define __SPARSITY_PATTERN_H_
 
 #include <vector>
+#include <fstream>
 #include <algorithm>
 
 #include "exception.h"
@@ -95,6 +96,9 @@ public:
     store_diagonal_first_in_row(m == n) {
       reinit(m, n, row_length);
   }
+
+  SparsityPatternBase(const SparsityPatternBase&, 
+      const index_t, const index_t);
 
 public:
   void reinit(const index_t, const index_t, const index_t); 

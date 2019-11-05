@@ -13,6 +13,7 @@
 #include "Functional.h"
 #include "EasyMesh.h"
 #include "AMGSolver.h"
+#include "bundled/solver.h"
 
 #define PI (4.0*atan(1.0))
 
@@ -78,8 +79,14 @@ int main(int argc, char * argv[])
   boundary_admin.add(boundary);
   boundary_admin.apply(stiff_matrix, solution, right_hand_side);
 
-  AMGSolver solver(stiff_matrix,1);
-  solver.solve(solution, right_hand_side, 1.0e-08, 200);	
+  //AMGSolver solver(stiff_matrix,1);
+  //solver.solve(solution, right_hand_side, 1.0e-08, 200);	
+
+  SolverControl cn; cn.log_history(true);
+  cn.set_max_steps(1000);
+  SolverBiCGSTAB<Vector<double>> solver(cn);
+  SparseILU<double> pre; pre.initialize(stiff_matrix);
+  solver.solve(stiff_matrix, solution, right_hand_side, pre);
 
   solution.writeOpenDXData("u.dx");
   double error = Functional::L2Error(solution, FunctionFunction<double>(&u), 10);
