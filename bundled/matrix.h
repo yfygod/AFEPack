@@ -13,9 +13,11 @@
 template <typename T, int R, int C, int Major = RowMajor>
 class MatrixType : public Eigen::Matrix<T, R, C, Major> {
   typedef Eigen::Matrix<T, R, C, Major> base_t;
-  typedef typename base_t::Index index_t; 
 
 public:
+  typedef typename base_t::Index index_t; 
+  typedef T scalar_t;
+
   enum {
     RowsAtCompileTime = base_t::RowsAtCompileTime,
     ColsAtCompileTime = base_t::ColsAtCompileTime,
@@ -115,9 +117,10 @@ typedef MatrixType<double, Dynamic, Dynamic> Matrix;
 template <typename T> 
 class FullMatrix : public MatrixType<T, Dynamic, Dynamic> {
   typedef MatrixType<T, Dynamic, Dynamic> base_t;
-  typedef typename Eigen::Matrix<T, Dynamic, Dynamic>::Index index_t;
 
 public:
+  typedef typename Eigen::Matrix<T, Dynamic, Dynamic>::Index index_t;
+  typedef typename base_t::scalar_t scalar_t;
   using base_t::base_t; 
 
   // the matrix operations below are the same as dealII::FullMatrix
@@ -132,6 +135,19 @@ public:
   void reinit(const index_t m, const index_t n) {
     base_t::resize(m, n); 
     base_t::setZero();
+  }
+
+  template <typename V0, typename V1>
+  void backward(V0& dst, const V1& src) const {
+    index_t j;
+    index_t nu = (base_t::rows() < base_t::cols() ? base_t::rows() : base_t::cols());
+
+    for(index_t i = nu - 1; i >= 0; --i) {
+      scalar_t s = src(i);
+      for(j = i + 1; j < nu; ++j)
+        s -= dst(j)*(*this)(i, j);
+      dst(i) = s/(*this)(i, i);
+    }
   }
 
   void gauss_jordan() {

@@ -25,9 +25,10 @@ enum {
 
 template <typename T, int S> 
 class VectorType : public Eigen::Matrix<T, S, 1> {
-  public:
+public:
   typedef Eigen::Matrix<T, S, 1> base_t;
   typedef typename base_t::Index Index;
+  typedef T scalar_t;
 
 public:
   enum {isDynamic = (S > Dynamic) ? false : true, 
@@ -89,7 +90,10 @@ public:
 
   inline void set_constant(const T t) { base_t::setConstant(t); }
 
-  void pritn(std::ostream& os) const {
+  double l1_norm() const { return (*this).template lpNorm<1>();}
+  double l2_norm() const { return (*this).template lpNorm<2>();}
+
+  void print(std::ostream& os) const {
     os << (*this) << "\n";
   }
 
@@ -112,6 +116,7 @@ class Vector : public VectorType<T, Dynamic> {
   typedef VectorType<T, Dynamic> base_t;
   typedef typename Eigen::Matrix<T, Dynamic, 1>::Index index_t;
 public:
+  using base_t::scalar_t;
   using base_t::base_t; 
 
   typedef T* iterator;
@@ -179,8 +184,6 @@ public:
     (*this) *= s; (*this) += (a*V) + (b*W);
   }
 
-  double l1_norm() const { return (*this).template lpNorm<1>();}
-  double l2_norm() const { return (*this).template lpNorm<2>();}
 
   bool all_zero() const {
     return base_t::isZero(1.e-15);

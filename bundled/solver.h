@@ -196,6 +196,7 @@ protected:
 #include "solver/precondition.h"
 #include "solver/solver_cg.h"
 #include "solver/solver_bicgstab.h"
+#include "solver/solver_gmres.h"
 #include "solver/sparse_decomposition.h"
 #include "solver/sparse_ilu.h"
 
